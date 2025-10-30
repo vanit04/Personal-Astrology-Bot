@@ -1,51 +1,30 @@
-# Personal Astrology Web App (Thai + OpenRouter)
+# Personal Astrology Web App - Pro (Thai UI, OpenRouter)
 
 ## คำอธิบาย (ภาษาไทย)
-ระบบเว็บแอปสำหรับทำนายดวงชะตาเฉพาะบุคคล โดยผสมหลักโหราศาสตร์ไทย จีน และสากล ผู้ใช้สามารถระบุปี พ.ศ. ที่ต้องการทำนายได้ ผลลัพธ์แสดงเป็นภาษาไทยและสามารถดาวน์โหลดเป็น PDF ได้
+เวอร์ชัน Pro: ระบบทำนายดวงชะตาส่วนบุคคลแบบละเอียดโดยใช้ 3 ศาสตร์ (ไทย, จีน, สากล) และ AI (OpenRouter) เพื่อสร้างการวิเคราะห์เชิงเหตุผลและการทำนายรายเดือนตลอดปีที่ผู้ใช้เลือก
 
 ### การติดตั้ง
 1. ติดตั้ง Python 3.8+ และ Git
 2. แตกไฟล์โปรเจกต์
 3. ติดตั้ง dependencies:
-```bash
+```
 pip install -r requirements.txt
 ```
 
 4. สมัครและรับ API Key จาก OpenRouter: https://openrouter.ai
 5. ตั้งค่า environment variable (Linux/macOS):
-```bash
+```
 export OPENROUTER_API_KEY="sk-xxxx"
 ```
 หรือบน Windows (PowerShell):
-```powershell
+```
 setx OPENROUTER_API_KEY "sk-xxxx"
 ```
 
 6. รันแอป:
-```bash
-streamlit run personal_astrology_webapp.py
+```
+streamlit run personal_astrology_webapp_pro.py
 ```
 
 ## README (English)
-This Streamlit web app predicts personal astrology by combining Thai, Chinese (BaZi-like), and Western astrology. The user can input a Thai Buddhist year (พ.ศ.) to predict for. AI interpretation is performed via OpenRouter (GPT-3.5). Output is in Thai with PDF export.
-
-### Install
-1. Install Python 3.8+ and Git
-2. Unzip project
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-4. Get OpenRouter API key: https://openrouter.ai
-5. Set environment variable:
-```bash
-export OPENROUTER_API_KEY="sk-xxxx"
-```
-
-6. Run:
-```bash
-streamlit run personal_astrology_webapp.py
-```
-
----
+This Pro Streamlit app generates detailed personal astrology forecasts using Thai, Chinese, and Western astrology. The user specifies a Thai Buddhist year (พ.ศ.) to forecast. AI interpretation and synthesis is performed via OpenRouter (GPT-3.5). Output is in Thai and can be exported to PDF.
