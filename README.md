@@ -1,36 +1,51 @@
-# Personal Astrology Web App (OpenRouter + PDF Export)
+# Personal Astrology Web App (Thai + OpenRouter)
 
-This Streamlit app computes basic astrological information (Thai / Chinese / Western),
-queries **OpenRouter API** for AI-based interpretation, and exports a PDF report.
+## คำอธิบาย (ภาษาไทย)
+ระบบเว็บแอปสำหรับทำนายดวงชะตาเฉพาะบุคคล โดยผสมหลักโหราศาสตร์ไทย จีน และสากล ผู้ใช้สามารถระบุปี พ.ศ. ที่ต้องการทำนายได้ ผลลัพธ์แสดงเป็นภาษาไทยและสามารถดาวน์โหลดเป็น PDF ได้
 
-## 🔧 Setup
+### การติดตั้ง
+1. ติดตั้ง Python 3.8+ และ Git
+2. แตกไฟล์โปรเจกต์
+3. ติดตั้ง dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-1. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+4. สมัครและรับ API Key จาก OpenRouter: https://openrouter.ai
+5. ตั้งค่า environment variable (Linux/macOS):
+```bash
+export OPENROUTER_API_KEY="sk-xxxx"
+```
+หรือบน Windows (PowerShell):
+```powershell
+setx OPENROUTER_API_KEY "sk-xxxx"
+```
 
-2. Get a free API key from [OpenRouter.ai](https://openrouter.ai/docs/api-reference/authentication)
+6. รันแอป:
+```bash
+streamlit run personal_astrology_webapp.py
+```
 
-3. Set your API key as environment variable (or in Streamlit Cloud secrets):
-   ```bash
-   export OPENROUTER_API_KEY="sk-xxxx"
-   ```
+## README (English)
+This Streamlit web app predicts personal astrology by combining Thai, Chinese (BaZi-like), and Western astrology. The user can input a Thai Buddhist year (พ.ศ.) to predict for. AI interpretation is performed via OpenRouter (GPT-3.5). Output is in Thai with PDF export.
 
-4. Run the app locally:
-   ```bash
-   streamlit run personal_astrology_webapp.py
-   ```
+### Install
+1. Install Python 3.8+ and Git
+2. Unzip project
+3. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-## ☁️ Deploy to Streamlit Cloud
-1. Push this project to GitHub
-2. Go to [Streamlit Cloud](https://streamlit.io/cloud)
-3. Create a new app → select your repo
-4. In **Settings → Secrets**, add:
-   ```
-   OPENROUTER_API_KEY = "sk-xxxx"
-   ```
-5. Deploy and open the app!
+4. Get OpenRouter API key: https://openrouter.ai
+5. Set environment variable:
+```bash
+export OPENROUTER_API_KEY="sk-xxxx"
+```
 
-## 📜 License
-MIT License — Free to modify and deploy.
+6. Run:
+```bash
+streamlit run personal_astrology_webapp.py
+```
+
+---
