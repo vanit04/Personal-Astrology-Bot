@@ -1,6 +1,6 @@
-"""Personal Astrology Web App (OpenRouter + PDF Export)
-Streamlit app that computes basic Western/Chinese/Thai astrological cues,
-asks OpenRouter API for interpretation, and exports PDF.
+# -*- coding: utf-8 -*-
+"""Personal Astrology Web App (ภาษาไทย) - OpenRouter + PDF Export
+รองรับการระบุปี พ.ศ. ที่ต้องการทำนาย และแสดงผลเป็นภาษาไทย
 """
 
 import streamlit as st
@@ -47,8 +47,8 @@ def calc_western_planets(jd):
 
 
 def chinese_zodiac(year: int):
-    animals = ['Rat','Ox','Tiger','Rabbit','Dragon','Snake','Horse','Goat','Monkey','Rooster','Dog','Pig']
-    elements = ['Wood','Fire','Earth','Metal','Water']
+    animals = ['หนู','วัว','เสือ','กระต่าย','มังกร','งู','ม้า','แพะ','ลิง','ไก่','สุนัข','หมู']
+    elements = ['ไม้','ไฟ','ดิน','ทอง','น้ำ']
     elem = elements[((year - 4) % 10)//2]
     animal = animals[(year - 4) % 12]
     return f"{elem} {animal}"
@@ -56,14 +56,14 @@ def chinese_zodiac(year: int):
 
 def thai_lunar(day: int):
     tithi = ((day - 1) % 30) + 1
-    phase = 'Waxing' if tithi <= 15 else 'Waning'
-    return {"tithi": tithi, "phase": phase}
+    phase = 'ข้างขึ้น' if tithi <= 15 else 'ข้างแรม'
+    return {"ดิถี": tithi, "สถานะ": phase}
 
 
 def ai_interpretation(prompt: str) -> str:
     api_key = os.getenv("OPENROUTER_API_KEY")
     if not api_key:
-        return "[AI Error] OPENROUTER_API_KEY not set. Please set in environment or Streamlit secrets."
+        return "[AI Error] OPENROUTER_API_KEY ไม่ได้ตั้งค่า. กรุณาตั้งใน environment หรือ Streamlit secrets."
 
     url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
@@ -74,7 +74,7 @@ def ai_interpretation(prompt: str) -> str:
         "model": "openai/gpt-3.5-turbo",
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.7,
-        "max_tokens": 500
+        "max_tokens": 800
     }
     try:
         resp = requests.post(url, headers=headers, json=body, timeout=60)
@@ -86,35 +86,36 @@ def ai_interpretation(prompt: str) -> str:
         return f"[AI Error] {e}"
 
 
-def generate_pdf(name, dt, lat, lon, western, zodiac, thai, ai_text):
+def generate_pdf(name, dt, lat, lon, western, zodiac, thai, target_year_p, ai_text):
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
 
     c.setFont("Helvetica-Bold", 16)
-    c.drawString(50, height-50, f"Astrological Report for {name}")
+    c.drawString(50, height-50, f"รายงานดวงชะตาส่วนบุคคล สำหรับ {name}")
 
     c.setFont("Helvetica", 11)
-    c.drawString(50, height-80, f"Born: {dt}  (Lat: {lat}, Lon: {lon})")
+    c.drawString(50, height-80, f"เกิด: {dt}  (ละติจูด: {lat}, ลองจิจูด: {lon})")
+    c.drawString(50, height-100, f"ปี พ.ศ. ที่ทำนาย: {target_year_p}")
 
-    c.drawString(50, height-110, f"Chinese Zodiac: {zodiac}")
-    c.drawString(50, height-130, f"Thai Lunar: {thai}")
+    c.drawString(50, height-130, f"ปีนักษัตร: {zodiac}")
+    c.drawString(50, height-150, f"ไทย (ดิถี): {thai}")
 
-    c.drawString(50, height-160, "Western Planets:")
-    y = height-180
+    c.drawString(50, height-180, "ตำแหน่งดาว (approx):")
+    y = height-200
     for k, v in western.items():
         line = f"{k}: {v}"
-        c.drawString(60, y, line[:90])
+        c.drawString(60, y, line[:100])
         y -= 14
         if y < 80:
             c.showPage()
             y = height-80
 
     c.setFont("Helvetica-Bold", 12)
-    c.drawString(50, y-10, "AI Interpretation:")
+    c.drawString(50, y-10, "การตีความจาก AI:")
     text_obj = c.beginText(60, y-30)
     text_obj.setFont("Helvetica", 11)
-    for line in ai_text.split("\\n"):
+    for line in ai_text.split("\n"):
         text_obj.textLine(line)
         if text_obj.getY() < 50:
             c.drawText(text_obj)
@@ -129,50 +130,58 @@ def generate_pdf(name, dt, lat, lon, western, zodiac, thai, ai_text):
     return buffer
 
 
-def main():
-    st.set_page_config(page_title="Personal Astrology Web App", layout="wide")
-    st.title("🔮 Personal Astrology Web App (OpenRouter + PDF Export)")
-    st.markdown("Analyze your birth chart (Thai / Chinese / Western) and get AI-assisted interpretation via OpenRouter API.")
+st.set_page_config(page_title="ระบบทำนายดวงส่วนบุคคล", layout="wide")
+st.title("🔮 ระบบทำนายดวงส่วนบุคคล (ไทย + จีน + สากล)")
+st.markdown("กรุณากรอกข้อมูลพื้นดวง และเลือกปี พ.ศ. ที่ต้องการให้ทำนาย (เช่น 2569)")
 
-    with st.form("birth_form"):
-        name = st.text_input("Name", value="วณิช อิงคะวณิช")
-        birth_date = st.date_input("Birth Date", value=datetime.date(1973,1,7))
-        birth_time = st.time_input("Birth Time", value=datetime.time(6,11))
-        lat = st.number_input("Latitude", value=13.752555, format="%.6f")
-        lon = st.number_input("Longitude", value=100.494066, format="%.6f")
-        submitted = st.form_submit_button("Analyze & Generate Report")
+with st.form("birth_form"):
+    name = st.text_input("ชื่อ-นามสกุล", value="วณิช อิงคะวณิช")
+    birth_date = st.date_input("วันเกิด", value=datetime.date(1973,1,7))
+    birth_time = st.time_input("เวลาเกิด (ชั่วโมง:นาที)", value=datetime.time(6,11))
+    lat = st.number_input("ละติจูด", value=13.752555, format="%.6f")
+    lon = st.number_input("ลองจิจูด", value=100.494066, format="%.6f")
+    target_year_p = st.number_input("ปี พ.ศ. ที่ต้องการทำนาย", min_value=2400, max_value=3000, value=2569)
+    submitted = st.form_submit_button("วิเคราะห์และสร้างรายงาน PDF")
 
-    if submitted:
-        tz = datetime.timezone(datetime.timedelta(hours=7))
-        dt = datetime.datetime.combine(birth_date, birth_time, tzinfo=tz)
-        jd = to_julian_day(dt)
+if submitted:
+    # Convert พ.ศ. to ค.ศ.
+    target_year_ad = int(target_year_p) - 543
+    tz = datetime.timezone(datetime.timedelta(hours=7))
+    dt = datetime.datetime.combine(birth_date, birth_time, tzinfo=tz)
+    jd = to_julian_day(dt)
 
-        western = calc_western_planets(jd)
-        zodiac = chinese_zodiac(birth_date.year)
-        thai = thai_lunar(birth_date.day)
+    western = calc_western_planets(jd)
+    zodiac = chinese_zodiac(birth_date.year)
+    thai = thai_lunar(birth_date.day)
 
-        summary = (
-            f"Name: {name}\\nBorn: {dt}\\nLat/Lon: {lat},{lon}\\n"
-            f"Western: {json.dumps(western)}\\nChinese: {zodiac}\\nThai: {thai}\\n"
-            "Please summarize key personality traits, strengths, weaknesses, and provide a concise outlook for years 2025 and 2026."
-        )
+    # Build Thai prompt for AI with target พ.ศ.
+    prompt = f\"\"\"คุณเป็นหมอดูที่ใช้หลักโหราศาสตร์ไทย จีน และสากล ให้ทำนายโดยใช้ข้อมูลต่อไปนี้ (ภาษาไทย):
+- ชื่อ: {name}
+- เกิด: {birth_date} เวลา {birth_time} (Bangkok, UTC+7)
+- ละติจูด/ลองจิจูด: {lat}, {lon}
+- ปี พ.ศ. ที่ต้องการทำนาย: {target_year_p} (คือ ค.ศ. {target_year_ad})
+- ข้อมูลพื้นดวงโดยย่อ: ปีนักษัตร: {zodiac} ; ไทย: {thai} ; ตำแหน่งดาวโดยคร่าว: {western}
 
-        st.subheader("🔭 Computed Astrological Data")
-        st.json({"Western": western, "Chinese": zodiac, "Thai": thai})
+โปรดให้ผลทำนายดังนี้ (เรียงเป็นหัวข้อ):
+1) สรุปภาพรวมของปี {target_year_p}
+2) การงาน การเงิน ความรัก สุขภาพ และโชคลาภ
+3) เหตุการณ์สำคัญรายเดือน (ถ้าเป็นไปได้ ให้แยกรายเดือน)
+4) คำแนะนำในการรับมือ / เสริมดวง (แบบที่สามารถทำได้จริง)
+ตอบเป็นภาษาไทย ใช้น้ำเสียงเป็นทางการและให้คำแนะนำที่ชัดเจนและเป็นประโยชน์
+\"\"\"
 
-        st.subheader("🤖 AI Interpretation (OpenRouter)")
-        with st.spinner("Generating interpretation via OpenRouter..."):
-            ai_text = ai_interpretation(summary)
-        st.write(ai_text or "No interpretation generated.")
+    st.subheader("🔭 ข้อมูลที่คำนวณได้")
+    st.json({"Western": western, "Chinese": zodiac, "Thai": thai, "ปี พ.ศ. ที่ทำนาย": target_year_p})
 
-        pdf_buf = generate_pdf(name, dt, lat, lon, western, zodiac, thai, ai_text)
-        st.download_button(
-            label="📄 Download PDF Report",
-            data=pdf_buf,
-            file_name=f"Astrology_Report_{name.replace(' ','_')}.pdf",
-            mime="application/pdf"
-        )
+    st.subheader("🤖 ผลการตีความโดย AI (OpenRouter)")
+    with st.spinner("กำลังติดต่อ OpenRouter เพื่อสร้างคำทำนาย..."):
+        ai_text = ai_interpretation(prompt)
+    st.write(ai_text or "ไม่มีการตีความจาก AI")
 
-
-if __name__ == '__main__':
-    main()
+    pdf_buf = generate_pdf(name, dt, lat, lon, western, zodiac, thai, target_year_p, ai_text)
+    st.download_button(
+        label="📄 ดาวน์โหลดรายงาน PDF (ภาษาไทย)" ,
+        data=pdf_buf,
+        file_name=f"รายงานดวง_{name.replace(' ','_')}_{target_year_p}.pdf",
+        mime="application/pdf"
+    )
